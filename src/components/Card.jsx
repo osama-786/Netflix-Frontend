@@ -46,8 +46,6 @@ export default React.memo(function Card({ type ="movie", index, movieData, isLik
               query: searchKey
           }
       })
-
-      console.log(data.results[0])
       setMovies(data.results)
       setMovie(data.results[0])
 

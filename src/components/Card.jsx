@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { IoPlayCircleSharp } from "react-icons/io5";
@@ -11,15 +11,62 @@ import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "../utils/firebase-config";
 import { useDispatch } from "react-redux";
 import { removeMovieFromLiked } from "../store";
-import video from "../assets/video.mp4";
+import ReactPlayer from 'react-player';
 
 
-export default React.memo(function Card({ index, movieData, isLiked = false }) {
+export default React.memo(function Card({ type ="movie", index, movieData, isLiked = false }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const MOVIE_API = "https://api.themoviedb.org/3/"
+  const SEARCH_API = MOVIE_API + "search/movie"
+  const DISCOVER_API = MOVIE_API + "discover/movie"
+  const API_KEY = "3d39d6bfe362592e6aa293f01fbcf9b9"
+
+  const [playing, setPlaying] = useState(false)
+  const [trailer, setTrailer] = useState([])
+  const [movies, setMovies] = useState([])
+  const [searchKey, setSearchKey] = useState("")
+  const [movie, setMovie] = useState({title: "Loading Movies"})
   const [isHovered, setIsHovered] = useState(false);
   const [email, setEmail] = useState(undefined);
 
+  useEffect(() => {
+      fetchMovies()
+  }, [])
+
+  const fetchMovies = async (event) => {
+      if (event) {
+          event.preventDefault()
+      }
+
+      const {data} = await axios.get(`${searchKey ? SEARCH_API : DISCOVER_API}`, {
+          params: {
+              api_key: API_KEY,
+              query: searchKey
+          }
+      })
+
+      console.log(data.results[0])
+      setMovies(data.results)
+      setMovie(data.results[0])
+
+      if (data.results.length) {
+          await fetchMovie(data.results[0].id)
+      }
+  }
+
+  const fetchMovie = async (id) => {
+      const {data} = await axios.get(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&language=en-US`)
+
+      setTrailer(data.results[0]?.key);
+      setMovie(data)
+  }
+  const selectMovie = (movie) => {
+    fetchMovie(movie.id)
+    setPlaying(false)
+    setMovie(movie)
+}
   onAuthStateChanged(firebaseAuth, (currentUser) => {
     if (currentUser) {
       setEmail(currentUser.email);
@@ -39,29 +86,23 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
 
   return (
     <Container
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {setIsHovered(true);selectMovie(movieData)}}
       onMouseLeave={() => setIsHovered(false)}
     >
       <img
         src={`https://image.tmdb.org/t/p/w500${movieData.image}`}
         alt="card"
-        onClick={() => navigate("/player")}
       />
-
       {isHovered && (
         <div className="hover">
           <div className="image-video-container">
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movieData.image}`}
-              alt="card"
-              onClick={() => navigate("/player")}
-            />
-            <video
-              src={video}
-              autoPlay={true}
-              loop
-              muted
-              onClick={() => navigate("/player")}
+           <ReactPlayer
+                key={trailer}
+                width="inherit"
+                height="inherit"
+                url={`https://www.youtube.com/watch?v=${trailer}`}
+                controls
+                playing={true}
             />
           </div>
           <div className="info-container flex column">

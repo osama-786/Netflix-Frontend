@@ -13,7 +13,6 @@ import { useDispatch } from "react-redux";
 import { removeMovieFromLiked } from "../store";
 import ReactPlayer from 'react-player';
 
-
 export default React.memo(function CardTv({ type ="tv", index, movieData, isLiked = false }) {
 
   const MOVIE_API = "https://api.themoviedb.org/3/"
@@ -42,8 +41,6 @@ export default React.memo(function CardTv({ type ="tv", index, movieData, isLike
               query: searchKey
           }
       })
-
-      console.log(data.results[0])
       setMovies(data.results)
       setMovie(data.results[0])
 
@@ -51,7 +48,6 @@ export default React.memo(function CardTv({ type ="tv", index, movieData, isLike
           await fetchMovie(data.results[0].id)
       }
   }
-
   const fetchMovie = async (id) => {
       const {data} = await axios.get(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&language=en-US`)
 
@@ -62,9 +58,7 @@ export default React.memo(function CardTv({ type ="tv", index, movieData, isLike
     fetchMovie(movie.id)
     setPlaying(false)
     setMovie(movie)
-    console.log(movieData)
 }
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isHovered, setIsHovered] = useState(false);
@@ -78,7 +72,7 @@ export default React.memo(function CardTv({ type ="tv", index, movieData, isLike
 
   const addToList = async () => {
     try {
-      await axios.post("http://localhost:5000/api/user/add", {
+      await axios.post("https://netflix-backend-yeai.onrender.com/api/user/add", {
         email,
         data: movieData,
       });
@@ -96,7 +90,6 @@ export default React.memo(function CardTv({ type ="tv", index, movieData, isLike
       <img
         src={`https://image.tmdb.org/t/p/w500${movieData.image}`}
         alt="card"
-        onClick={() => navigate("/player")}
       />
 
       {isHovered && (

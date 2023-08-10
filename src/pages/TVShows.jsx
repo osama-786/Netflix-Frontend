@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
-import CardSlider from "../components/CardSlider";
 import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "../utils/firebase-config";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMovies, getGenres } from "../store";
 import SelectGenre from "../components/SelectGenre";
-import Slider from "../components/Slider";
+import SliderTv from "../components/SliderTv";
 
 function TVShows() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -49,7 +48,7 @@ function TVShows() {
         <SelectGenre genres={genres} type="tv" />
         {movies.length ? (
           <>
-            <Slider movies={movies} />
+             <SliderTv movies={movies} />          
           </>
         ) : (
           <h1 className="not-available">
